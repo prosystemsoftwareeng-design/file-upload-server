@@ -1,5 +1,4 @@
 module.exports = async (req, res) => {
-  // إعدادات CORS للسماح بالاتصال من أي مكان
   res.setHeader('Access-Control-Allow-Credentials', 'true');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -17,28 +16,20 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // قراءة البيانات المرسلة مباشرة كـ Buffer
-    const buffers = [];
+    let body = '';
     for await (const chunk of req) {
-      buffers.push(chunk);
-    }
-    const rawData = Buffer.concat(buffers);
-
-    if (!rawData || rawData.length === 0) {
-      return res.status(400).json({ success: false, message: 'No file uploaded or empty body' });
+      body += chunk;
     }
 
-    // توليد اسم افتراضي وحجم للملف واستخراج نوعه
-    const filename = req.headers['x-file-name'] || `file_${Date.now()}`;
-    const contentType = req.headers['content-type'] || 'application/octet-stream';
-    
-    const base64Data = rawData.toString('base64');
-    const downloadUrl = `data:${contentType};base64,${base64Data}`;
+    const data = JSON.parse(body);
+    if (!data.file || !data.filename) {
+      return res.status(400).json({ success: false, message: 'Invalid file data' });
+    }
 
     return res.status(200).json({
       success: true,
-      filename: filename,
-      download_url: downloadUrl
+      filename: data.filename,
+      download_url: data.file
     });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
