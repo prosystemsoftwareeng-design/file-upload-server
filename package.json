@@ -1,6 +1,7 @@
 {
-  "name": "vercel-file-upload",
+  "name": "file-upload-server",
   "version": "1.0.0",
+  "main": "server.js",
   "dependencies": {
     "multer": "^1.4.5-lts.1"
   }
